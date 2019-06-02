@@ -1,0 +1,17 @@
+sources:
+  - ./IRShowcase
+templates:
+  - ./Sourcery/Templates
+output:
+  ./IRShowcaseTests
+args:
+  testable:
+    - IRShowcase
+  import:
+    - ReactiveSwift
+    - Result
+  excludedSwiftLintRules:
+    - identifier_name
+    - function_body_length
+    - force_cast
+    - vertical_whitespace

@@ -1,0 +1,13 @@
+# App specific
+github "texturegroup/texture" "2.8"
+github "ReactiveCocoa/ReactiveSwift" "4.0.0"
+github "ReactiveCocoa/ReactiveCocoa" "8.0.2"
+github "indievox-inc/Doppelganger" "14ab6c6dbc6e504298e80592791e6a37db6521a3" # while waiting for https://github.com/Wondermall/Doppelganger/pull/8
+github "rwbutler/Connectivity" "2.2.0"
+github "iruleonu/IRCoreDataStack" "1.1"
+
+# Testing
+github "Quick/Nimble" "v8.0.1"
+github "Quick/Quick" "v2.0.0"
+github "MakeAWishFoundation/SwiftyMocky"
+github "uber/ios-snapshot-test-case" "6.0.0"

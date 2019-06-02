@@ -1,0 +1,25 @@
+language: objective-c
+osx_image: xcode10.2
+before_install:
+  - brew update
+  - brew outdated carthage || brew upgrade carthage
+  - gem install xcpretty -v 0.2.2
+  - gem install xcpretty-travis-formatter
+  - xcrun simctl list
+install: 
+  - echo "<3"
+  - travis_wait 60 carthage bootstrap --platform ios --new-resolver --cache-builds
+env:
+  - MODE=tests
+  - MODE=build
+before_script:
+ - chmod +x build.sh
+script: 
+ - ./build.sh $MODE
+after_success:
+  - echo "<3"
+
+# whitelist
+branches:
+  only:
+    - master
