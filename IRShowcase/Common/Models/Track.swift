@@ -15,8 +15,8 @@ struct Track: Codable {
     let collectionPrice: Float
     let artworkUrl60: String
     let artworkUrl100: String
-    let userHasSeenThis: Bool
-    let userHasDeletedThis: Bool
+    var userHasSeenThis: Bool
+    var userHasDeletedThis: Bool
     
     enum CodingKeys: String, CodingKey {
         case trackId
@@ -38,8 +38,25 @@ struct Track: Codable {
         let collectionPrice = try container.decode(Float.self, forKey: .collectionPrice)
         let artworkUrl60 = try container.decode(String.self, forKey: .artworkUrl60)
         let artworkUrl100 = try container.decode(String.self, forKey: .artworkUrl100)
-        let userHasSeenThis = try container.decodeIfPresent(Bool.self, forKey: .userHasSeenThis) ?? false
-        let userHasDeletedThis = try container.decodeIfPresent(Bool.self, forKey: .userHasDeletedThis) ?? false
+        
+        let userHasSeenThis: Bool
+        if let userHasSeenThisBool = try? container.decodeIfPresent(Bool.self, forKey: .userHasSeenThis) {
+            userHasSeenThis = userHasSeenThisBool
+        } else if let userHasSeenThisNumber = try? container.decodeIfPresent(Int.self, forKey: .userHasSeenThis) {
+            userHasSeenThis = userHasSeenThisNumber == 1 ? true : false
+        } else {
+            userHasSeenThis = false
+        }
+        
+        let userHasDeletedThis: Bool
+        if let userHasDeletedThisBool = try? container.decodeIfPresent(Bool.self, forKey: .userHasDeletedThis) {
+            userHasDeletedThis = userHasDeletedThisBool
+        } else if let userHasDeletedThisNumber = try? container.decodeIfPresent(Int.self, forKey: .userHasDeletedThis) {
+            userHasDeletedThis = userHasDeletedThisNumber == 1 ? true : false
+        } else {
+            userHasDeletedThis = false
+        }
+        
         self.init(trackId: trackId, trackName: trackName, trackDescription: trackDescription, collectionPrice: collectionPrice, artworkUrl60: artworkUrl60, artworkUrl100: artworkUrl100, userHasSeenThis: userHasSeenThis, userHasDeletedThis: userHasDeletedThis)
     }
     
@@ -52,6 +69,8 @@ struct Track: Codable {
         try container.encode(artworkUrl60, forKey: .artworkUrl60)
         try container.encode(artworkUrl100, forKey: .artworkUrl100)
         try container.encode(wrapperTypeName, forKey: .wrapperTypeName)
+        try container.encode(userHasSeenThis, forKey: .userHasSeenThis)
+        try container.encode(userHasDeletedThis, forKey: .userHasDeletedThis)
     }
     
     init(trackId: Int64, trackName: String, trackDescription: String?, collectionPrice: Float, artworkUrl60: String, artworkUrl100: String, userHasSeenThis: Bool, userHasDeletedThis: Bool) {
@@ -80,7 +99,11 @@ extension Track: SearchResultsWrapperModelTypeProtocol {
     }
 }
 
-extension Track: Equatable {
+extension Track: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(trackId)
+    }
+    
     static func == (left: Track, right: Track) -> Bool {
         return left.trackId == right.trackId
     }

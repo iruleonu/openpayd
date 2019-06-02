@@ -11,6 +11,7 @@ import AsyncDisplayKit
 import ReactiveSwift
 
 class TrackCellNode: ASCellNode {
+    let viewModel: ITunesSearchListCellViewModel
     let imageNode: ASNetworkImageNode
     let titleTextNode: ASTextNode
     let subtitleTextNode: ASTextNode
@@ -22,6 +23,7 @@ class TrackCellNode: ASCellNode {
     }
     
     required init(viewModel vm: ITunesSearchListCellViewModel) {
+        viewModel = vm
         imageNode = TrackCellNode.setupImageNode(imageUrl: vm.imageUrl)
         titleTextNode = TrackCellNode.setupTitleNode(text: "Track")
         subtitleTextNode = TrackCellNode.setupSubtitleNode(text: vm.title)
@@ -36,7 +38,7 @@ class TrackCellNode: ASCellNode {
     
     override var isHighlighted: Bool {
         willSet {
-            let backgColor: UIColor = newValue ? UIColor.gray : UIColor.white
+            let backgColor: UIColor = newValue ? UIColor.gray : (viewModel.userHasSeenItem ? UIColor.blue : UIColor.white)
             backgroundColor = backgColor
         }
     }

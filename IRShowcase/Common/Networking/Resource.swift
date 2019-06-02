@@ -15,8 +15,6 @@ enum Resource {
     case track(id: String)
     case posts
     case post(id: String)
-    case comments(postId: String)
-    case user(id: String)
 }
 
 extension Resource {

@@ -16,19 +16,23 @@ protocol ITunesItemDetailsChildBuilders {
 
 struct ITunesItemDetailsBuilder: ITunesItemDetailsChildBuilders {
     // swiftlint:disable function_parameter_count
-    func make(navigation: UINavigationController?, postId: Int, network: DataProviderNetworkProtocol, persistence: DataProviderPersistenceProtocol, connectivity: ConnectivityService, action: @escaping (ITunesSearchListAction) -> Void) -> UIViewController {
-        let coordinator = PostDetailsCoordinator(navigation: navigation, builders: self)
-        let config = DataProviderConfiguration.standard
-        let userHandlersFactory: DataProviderHandlersBuilder<[User]> = DataProviderHandlersBuilder()
-        let userHandlers: DataProviderHandlers<[User]> = userHandlersFactory.makeDataProviderHandlers(config: config)
-        let userDataProvider = DataProvider<[User]>(config: config, network: network, persistence: persistence, handlers: userHandlers)
-        let postHandlersFactory: DataProviderHandlersBuilder<[Post]> = DataProviderHandlersBuilder()
-        let postHandlers: DataProviderHandlers<[Post]> = postHandlersFactory.makeDataProviderHandlers(config: config)
-        let postDataProvider = DataProvider<[Post]>(config: config, network: network, persistence: persistence, handlers: postHandlers)
-        let commentsHandlersFactory: DataProviderHandlersBuilder<[Comment]> = DataProviderHandlersBuilder()
-        let commentsHandlers: DataProviderHandlers<[Comment]> = commentsHandlersFactory.makeDataProviderHandlers(config: config)
-        let commentsDataProvider = DataProvider<[Comment]>(config: config, network: network, persistence: persistence, handlers: commentsHandlers)
-        let viewModel = ITunesItemDetailsViewModelImpl(routing: coordinator, postId: postId, userDataProvider: userDataProvider, postDataProvider: postDataProvider, commentsDataProvider: commentsDataProvider, connectivity: connectivity)
+    func make(navigation: UINavigationController?, audioBookId: Int, network: DataProviderNetworkProtocol, persistence: DataProviderPersistenceProtocol, connectivity: ConnectivityService, action: @escaping (ITunesSearchListAction) -> Void) -> UIViewController {
+        let coordinator = ITunesItemDetailsCoordinator(navigation: navigation, builders: self)
+        let config = DataProviderConfiguration.localOnly
+        let audiobookHandlersFactory: DataProviderHandlersBuilder<[AudioBook]> = DataProviderHandlersBuilder()
+        let audiobookHandlers: DataProviderHandlers<[AudioBook]> = audiobookHandlersFactory.makeDataProviderHandlers(config: config)
+        let audiobooksDataProvider = DataProvider<[AudioBook]>(config: config, network: network, persistence: persistence, handlers: audiobookHandlers)
+        let viewModel = ITunesAudioBookItemDetailsViewModelImpl(routing: coordinator, audioBookId: audioBookId, audioBooksDataProvider: audiobooksDataProvider, action: action)
+        return ITunesItemDetailsViewController(viewModel: viewModel)
+    }
+    
+    func make(navigation: UINavigationController?, trackId: Int, network: DataProviderNetworkProtocol, persistence: DataProviderPersistenceProtocol, connectivity: ConnectivityService, action: @escaping (ITunesSearchListAction) -> Void) -> UIViewController {
+        let coordinator = ITunesItemDetailsCoordinator(navigation: navigation, builders: self)
+        let config = DataProviderConfiguration.localOnly
+        let trackHandlersFactory: DataProviderHandlersBuilder<[Track]> = DataProviderHandlersBuilder()
+        let trackHandlers: DataProviderHandlers<[Track]> = trackHandlersFactory.makeDataProviderHandlers(config: config)
+        let tracksDataProvider = DataProvider<[Track]>(config: config, network: network, persistence: persistence, handlers: trackHandlers)
+        let viewModel = ITunesTrackItemDetailsViewModelImpl(routing: coordinator, trackId: trackId, tracksDataProvider: tracksDataProvider, action: action)
         return ITunesItemDetailsViewController(viewModel: viewModel)
     }
     // swiftlint:enable function_parameter_count

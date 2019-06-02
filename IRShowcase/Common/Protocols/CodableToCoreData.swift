@@ -16,7 +16,7 @@ protocol CodableToPersistence {
     var relationshipPropertyNames: [String] { get }
     
     // Name of the properties that have a mapping with a different name in CD
-    var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] { get } // swiftlint:disable:this identifier_name
+    static var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] { get } // swiftlint:disable:this identifier_name
     
     // Dictionary without CD relationships, to import insert to CD without conflicts
     var dictionaryWithoutCDRelationships: [String: AnyObject] { get }
