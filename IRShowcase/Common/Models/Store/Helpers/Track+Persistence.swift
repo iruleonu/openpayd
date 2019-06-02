@@ -34,8 +34,9 @@ extension Track: CodableToPersistence {
         return "\(trackId)"
     }
     
-    var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] {
-        return ["trackId": "id", "shortDescription": "trackDescription"]
+    static var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] {
+        return ["trackId": "id",
+                "shortDescription": "trackDescription"]
     }
     
     private var dictionaryRepresentation: [String: AnyObject] {
@@ -48,7 +49,7 @@ extension Track: CodableToPersistence {
                 throw error
             }
             
-            propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey.forEach { (key, value) in
+            Track.propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey.forEach { (key, value) in
                 defer {
                     json.removeValue(forKey: key)
                 }
@@ -67,12 +68,23 @@ extension Track: CoreDataToCodable {
     static func mapToModel<T>(_ object: NSManagedObject) -> T? where T: Decodable, T: Encodable {
         let keys = object.entity.attributesByName.keys.compactMap({ $0 })
         let dict = object.dictionaryWithValues(forKeys: keys)
+        var transformDict = dict
+        Track.propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey.forEach { (key, value) in
+            defer {
+                transformDict.removeValue(forKey: value)
+            }
+            guard let sourceValue = transformDict[value], !(sourceValue is NSNull) else { return }
+            transformDict[key] = sourceValue
+        }
+        
         var post: Track?
         do {
-            let data = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
+            let data = try JSONSerialization.data(withJSONObject: transformDict, options: .prettyPrinted)
             let postFromData = try JSONDecoder().decode(Track.self, from: data)
             post = postFromData
-        } catch { }
+        } catch let e {
+            print(e)
+        }
         
         return post as? T
     }

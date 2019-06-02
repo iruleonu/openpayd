@@ -28,9 +28,11 @@ final class ITunesSearchListViewModelState {
     }
     
     enum SharedStateAction {
-        case replacePosts([SearchResultsWrapperModelTypeProtocol])
-        case updatePosts([SearchResultsWrapperModelTypeProtocol])
+        case replaceItems([SearchResultsWrapperModelTypeProtocol])
+        case updateItems([SearchResultsWrapperModelTypeProtocol])
         case updateOrInsertIfMissing([SearchResultsWrapperModelTypeProtocol])
+        case markRowAsSeen(Int64, SearchResultsWrapperType)
+        case markRowAsDeleted(Int64, SearchResultsWrapperType)
         case reset
     }
     
@@ -46,9 +48,13 @@ final class ITunesSearchListViewModelState {
         var sharedState = sharedState
         
         switch action {
-        case let .replacePosts(items):
+        case let .markRowAsSeen(itemId, wrapperType):
+            sharedState = markRowWithItemIdAsSeen(itemId, wrapperType: wrapperType, sharedState: sharedState)
+        case let .markRowAsDeleted(itemId, wrapperType):
+            sharedState = markRowWithItemIdAsDeleted(itemId, wrapperType: wrapperType, sharedState: sharedState)
+        case let .replaceItems(items):
             sharedState = replaceItems(items, sharedState: sharedState)
-        case let .updatePosts(items):
+        case let .updateItems(items):
             sharedState = updateItems(items, sharedState: sharedState)
         case let .updateOrInsertIfMissing(items):
             sharedState = updateOrInsertIfMissing(items, sharedState: sharedState)
@@ -72,11 +78,13 @@ final class ITunesSearchListViewModelState {
             switch item.wrapperType {
             case .audiobook:
                 guard let cast = item as? AudioBook else { break }
-                let cellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.collectionName, imageUrl: cast.artworkUrl60, cellType: .audioBook, userHasSeenItem: false)
+                guard !cast.userHasDeletedThis else { break }
+                let cellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.collectionName, imageUrl: cast.artworkUrl60, cellType: .audioBook, userHasSeenItem: cast.userHasSeenThis)
                 aux.append(cellVM)
             case .track:
                 guard let cast = item as? Track else { break }
-                let cellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.trackName, imageUrl: cast.artworkUrl60, cellType: .track, userHasSeenItem: false)
+                guard !cast.userHasDeletedThis else { break }
+                let cellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.trackName, imageUrl: cast.artworkUrl60, cellType: .track, userHasSeenItem: cast.userHasSeenThis)
                 aux.append(cellVM)
             default:
                 break
@@ -98,12 +106,24 @@ final class ITunesSearchListViewModelState {
             case .audiobook:
                 guard let cast = item as? AudioBook else { break }
                 guard let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) else { break }
+                
+                guard !cast.userHasDeletedThis else {
+                    aux.remove(at: indexForElementWithSameId)
+                    break
+                }
+                
                 let updatedCellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.collectionName, imageUrl: cast.artworkUrl60, cellType: .audioBook, userHasSeenItem: cast.userHasSeenThis)
                 aux.remove(at: indexForElementWithSameId)
                 aux.insert(updatedCellVM, at: indexForElementWithSameId)
             case .track:
                 guard let cast = item as? Track else { break }
                 guard let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) else { break }
+                
+                guard !cast.userHasDeletedThis else {
+                    aux.remove(at: indexForElementWithSameId)
+                    break
+                }
+                
                 let updatedCellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.trackName, imageUrl: cast.artworkUrl60, cellType: .track, userHasSeenItem: cast.userHasSeenThis)
                 aux.remove(at: indexForElementWithSameId)
                 aux.insert(updatedCellVM, at: indexForElementWithSameId)
@@ -127,21 +147,24 @@ final class ITunesSearchListViewModelState {
             case .audiobook:
                 guard let cast = item as? AudioBook else { break }
                 let updatedCellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.collectionName, imageUrl: cast.artworkUrl60, cellType: .audioBook, userHasSeenItem: cast.userHasSeenThis)
-                guard let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) else {
+                
+                if let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) {
+                    aux.remove(at: indexForElementWithSameId)
+                    guard !cast.userHasDeletedThis else { break }
+                    aux.insert(updatedCellVM, at: indexForElementWithSameId)
+                } else {
                     aux.insert(updatedCellVM, at: 0)
-                    break
                 }
-                aux.remove(at: indexForElementWithSameId)
-                aux.insert(updatedCellVM, at: indexForElementWithSameId)
             case .track:
                 guard let cast = item as? Track else { break }
                 let updatedCellVM = ITunesSearchListCellViewModel(id: cast.wrapperIdentifier, title: cast.trackName, imageUrl: cast.artworkUrl60, cellType: .track, userHasSeenItem: cast.userHasSeenThis)
-                guard let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) else {
+                if let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == item.wrapperIdentifier }) {
+                    aux.remove(at: indexForElementWithSameId)
+                    guard !cast.userHasDeletedThis else { break }
+                    aux.insert(updatedCellVM, at: indexForElementWithSameId)
+                } else {
                     aux.insert(updatedCellVM, at: 0)
-                    break
                 }
-                aux.remove(at: indexForElementWithSameId)
-                aux.insert(updatedCellVM, at: indexForElementWithSameId)
             default:
                 break
             }
@@ -150,5 +173,54 @@ final class ITunesSearchListViewModelState {
         sharedState.dataSource.rows = aux
         
         return sharedState
+    }
+    
+    private static func markRowWithItemIdAsSeen(_ id: Int64, wrapperType: SearchResultsWrapperType, sharedState: VMSharedState) -> VMSharedState {
+        let mapWrapperTypeToCellVMType = mapWrapperTypeToCellTypeVM(wrapperType)
+        
+        guard
+            let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == id && $0.cellType == mapWrapperTypeToCellVMType }),
+            var itemVM = sharedState.dataSource.rows.first(where: { $0.id == id })
+            else { return sharedState }
+        
+        var sharedState: VMSharedState = sharedState
+        var aux: [ITunesSearchListCellViewModel] = sharedState.dataSource.rows
+        
+        itemVM.userHasSeenItem = true
+        aux.remove(at: indexForElementWithSameId)
+        aux.insert(itemVM, at: indexForElementWithSameId)
+        
+        sharedState.dataSource.rows = aux
+        
+        return sharedState
+    }
+    
+    private static func markRowWithItemIdAsDeleted(_ id: Int64, wrapperType: SearchResultsWrapperType, sharedState: VMSharedState) -> VMSharedState {
+        let mapWrapperTypeToCellVMType = mapWrapperTypeToCellTypeVM(wrapperType)
+        
+        guard
+            let indexForElementWithSameId = sharedState.dataSource.rows.firstIndex(where: { $0.id == id && $0.cellType == mapWrapperTypeToCellVMType }),
+            var itemVM = sharedState.dataSource.rows.first(where: { $0.id == id })
+            else { return sharedState }
+        
+        var sharedState: VMSharedState = sharedState
+        var aux: [ITunesSearchListCellViewModel] = sharedState.dataSource.rows
+        
+        aux.remove(at: indexForElementWithSameId)
+        
+        sharedState.dataSource.rows = aux
+        
+        return sharedState
+    }
+    
+    private static func mapWrapperTypeToCellTypeVM(_ wrapperType: SearchResultsWrapperType) -> ITunesSearchListCellViewModel.CellType {
+        switch wrapperType {
+        case .audiobook:
+            return .audioBook
+        case .track:
+            return .track
+        default:
+            return .unknown
+        }
     }
 }

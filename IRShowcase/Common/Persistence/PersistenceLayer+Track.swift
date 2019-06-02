@@ -12,6 +12,7 @@ import ReactiveSwift
 
 protocol EntityFetchTracksProtocol {
     func fetchTrack(id: Int64) -> SignalProducer<[Track], PersistenceLayerError>
+    func fetchTracks(ids: [Int64]) -> SignalProducer<[Track], PersistenceLayerError>
 }
 
 extension PersistenceLayerImpl: EntityFetchTracksProtocol {
@@ -32,7 +33,33 @@ extension PersistenceLayerImpl: EntityFetchTracksProtocol {
             } catch {}
             
             guard results.count > 0 else {
-                let error = NSError.error(withMessage: "No results for post with id: \(id)")
+                let error = NSError.error(withMessage: "No results for track with id: \(id)")
+                observer.send(error: PersistenceLayerError.emptyResult(error: error))
+                return
+            }
+            
+            observer.send(value: results)
+        }
+    }
+    
+    func fetchTracks(ids: [Int64]) -> SignalProducer<[Track], PersistenceLayerError> {
+        let context = coreDataStack.managedObjectContext!
+        
+        return SignalProducer<[Track], PersistenceLayerError> { observer, _ in
+            var results: [Track] = []
+            
+            do {
+                let fetchRequest: NSFetchRequest<TrackCD> = TrackCD.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "id IN %@", ids)
+                let aux = try context.fetch(fetchRequest) as [TrackCD]
+                aux.forEach({ (cd) in
+                    guard let audioBook: Track = Track.mapToModel(cd) else { return }
+                    results.append(audioBook)
+                })
+            } catch {}
+            
+            guard results.count > 0 else {
+                let error = NSError.error(withMessage: "No results for tracks with ids: \(ids)")
                 observer.send(error: PersistenceLayerError.emptyResult(error: error))
                 return
             }

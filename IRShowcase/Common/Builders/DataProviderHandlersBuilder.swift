@@ -45,7 +45,9 @@ struct DataProviderHandlersBuilder<T: Codable> {
         }
     }
     let standardPersistenceLoadHandler: DataProviderHandlers<T>.PersistenceLoadHandler = { (persistenceLayer, resource) in
-        return persistenceLayer.fetchResource(resource).mapError({ DataProviderError.persistence(error: $0) })
+        return persistenceLayer
+            .fetchResource(resource)
+            .mapError({ DataProviderError.persistence(error: $0) })
     }
     let standardPersistenceRemoveHandler: DataProviderHandlers.PersistenceRemoveHandler = { (persistenceLayer, resource) in
         return persistenceLayer.removeResource(resource).mapError({ DataProviderError.persistence(error: $0) })

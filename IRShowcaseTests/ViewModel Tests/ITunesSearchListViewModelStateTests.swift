@@ -43,11 +43,11 @@ class ITunesSearchListViewModelStateTests: QuickSpec {
                         let twoPosts = [item1, item2]
                         let threePosts = [item1, item2, item3]
                         
-                        var sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.replacePosts(threePosts)
+                        var sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.replaceItems(threePosts)
                         sharedState = ITunesSearchListViewModelState.handleSharedStateAction(sharedStateAction, sharedState: sharedState)
                         expect(sharedState.dataSource.rows.count).to(equal(3))
                         
-                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.replacePosts(twoPosts)
+                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.replaceItems(twoPosts)
                         sharedState = ITunesSearchListViewModelState.handleSharedStateAction(sharedStateAction, sharedState: sharedState)
                         expect(sharedState.dataSource.rows.count).to(equal(2))
                     })
@@ -62,7 +62,7 @@ class ITunesSearchListViewModelStateTests: QuickSpec {
                         let twoPosts = [item1, item2]
                         let threePosts = [item1, item2, item3]
                         
-                        var sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updatePosts(threePosts)
+                        var sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updateItems(threePosts)
                         sharedState = ITunesSearchListViewModelState.handleSharedStateAction(sharedStateAction, sharedState: sharedState)
                         expect(sharedState.dataSource.rows.count).to(equal(0))
                         
@@ -71,13 +71,13 @@ class ITunesSearchListViewModelStateTests: QuickSpec {
                         expect(sharedState.dataSource.rows.count).to(equal(2))
                         
                         let item2WithDifferentTrackName = Track(trackId: 2, trackName: "2b", trackDescription: "2", collectionPrice: 2, artworkUrl60: "", artworkUrl100: "", userHasSeenThis: false, userHasDeletedThis: false)
-                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updatePosts([item2WithDifferentTrackName])
+                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updateItems([item2WithDifferentTrackName])
                         sharedState = ITunesSearchListViewModelState.handleSharedStateAction(sharedStateAction, sharedState: sharedState)
                         expect(sharedState.dataSource.rows.count).to(equal(2))
                         expect(sharedState.dataSource.rows[0].title).to(equal("2b"))
                         
                         // Update post that isnt the array
-                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updatePosts([item3])
+                        sharedStateAction = ITunesSearchListViewModelState.SharedStateAction.updateItems([item3])
                         sharedState = ITunesSearchListViewModelState.handleSharedStateAction(sharedStateAction, sharedState: sharedState)
                         expect(sharedState.dataSource.rows.count).to(equal(2))
                         

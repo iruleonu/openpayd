@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 
 //sourcery: AutoMockable
-protocol PostsListRouting {
+protocol ITunesSearchListRouting {
     func showTrack(id: Int64, action: @escaping (ITunesSearchListAction) -> Void)
     func showAudioBook(id: Int64, action: @escaping (ITunesSearchListAction) -> Void)
 }
 
-final class PostsListCoordinator: PostsListRouting {
+final class ITunesSearchListCoordinator: ITunesSearchListRouting {
     private weak var navigation: UINavigationController?
     private let builders: ITunesSearchListChildBuilders
     private let network: DataProviderNetworkProtocol
@@ -31,12 +31,12 @@ final class PostsListCoordinator: PostsListRouting {
     }
     
     func showTrack(id: Int64, action: @escaping (ITunesSearchListAction) -> Void) {
-        let vc = builders.makePostDetails(navigation: navigation, postId: Int(id), network: network, persistence: persistence, connectivity: connectivity, action: action)
+        let vc = builders.makeTrackDetails(navigation: navigation, id: Int(id), network: network, persistence: persistence, connectivity: connectivity, action: action)
         navigation?.pushViewController(vc, animated: true)
     }
     
     func showAudioBook(id: Int64, action: @escaping (ITunesSearchListAction) -> Void) {
-        let vc = builders.makePostDetails(navigation: navigation, postId: Int(id), network: network, persistence: persistence, connectivity: connectivity, action: action)
+        let vc = builders.makeAudioBookDetails(navigation: navigation, id: Int(id), network: network, persistence: persistence, connectivity: connectivity, action: action)
         navigation?.pushViewController(vc, animated: true)
     }
 }

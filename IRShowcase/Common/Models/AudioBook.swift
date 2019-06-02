@@ -17,8 +17,8 @@ struct AudioBook: Codable {
     let artworkUrl60: String
     let artworkUrl100: String
     let collectionPrice: Float
-    let userHasSeenThis: Bool
-    let userHasDeletedThis: Bool
+    var userHasSeenThis: Bool
+    var userHasDeletedThis: Bool
     
     enum CodingKeys: String, CodingKey {
         case collectionId
@@ -44,8 +44,25 @@ struct AudioBook: Codable {
         let artworkUrl60 = try container.decode(String.self, forKey: .artworkUrl60)
         let artworkUrl100 = try container.decode(String.self, forKey: .artworkUrl100)
         let collectionPrice = try container.decode(Float.self, forKey: .collectionPrice)
-        let userHasSeenThis = try container.decodeIfPresent(Bool.self, forKey: .userHasSeenThis) ?? false
-        let userHasDeletedThis = try container.decodeIfPresent(Bool.self, forKey: .userHasDeletedThis) ?? false
+        
+        let userHasSeenThis: Bool
+        if let userHasSeenThisBool = try? container.decodeIfPresent(Bool.self, forKey: .userHasSeenThis) {
+            userHasSeenThis = userHasSeenThisBool
+        } else if let userHasSeenThisNumber = try? container.decodeIfPresent(Int.self, forKey: .userHasSeenThis) {
+            userHasSeenThis = userHasSeenThisNumber == 1 ? true : false
+        } else {
+            userHasSeenThis = false
+        }
+        
+        let userHasDeletedThis: Bool
+        if let userHasDeletedThisBool = try? container.decodeIfPresent(Bool.self, forKey: .userHasDeletedThis) {
+            userHasDeletedThis = userHasDeletedThisBool
+        } else if let userHasDeletedThisNumber = try? container.decodeIfPresent(Int.self, forKey: .userHasDeletedThis) {
+            userHasDeletedThis = userHasDeletedThisNumber == 1 ? true : false
+        } else {
+            userHasDeletedThis = false
+        }
+        
         self.init(artistId: artistId, collectionId: collectionId, artistName: artistName, itemDescription: itemDescription, collectionName: collectionName, artworkUrl60: artworkUrl60, artworkUrl100: artworkUrl100, collectionPrice: collectionPrice, userHasSeenThis: userHasSeenThis, userHasDeletedThis: userHasDeletedThis)
     }
     
@@ -92,18 +109,12 @@ extension AudioBook: SearchResultsWrapperModelTypeProtocol {
     }
 }
 
-extension AudioBook: Equatable {
+extension AudioBook: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(collectionId)
+    }
+    
     static func == (left: AudioBook, right: AudioBook) -> Bool {
         return left.collectionId == right.collectionId
     }
 }
-
-//extension AudioBook: WrapperModelType {
-//    var wrapperTypeName: String {
-//        return WrapperType.audiobook.description
-//    }
-//    
-//    var wrapperIdentifier: Int64 {
-//        return collectionId
-//    }
-//}

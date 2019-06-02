@@ -11,16 +11,22 @@ import Foundation
 import UIKit
 
 //sourcery: AutoMockable
-protocol PostDetailsRouting: class {
-    // Empty
+protocol ITunesItemDetailsRouting: class {
+    func dismissScreen()
 }
 
-final class PostDetailsCoordinator: PostDetailsRouting {
+final class ITunesItemDetailsCoordinator {
     private weak var navigation: UINavigationController?
     private let builders: ITunesItemDetailsChildBuilders
     
     init(navigation nav: UINavigationController?, builders b: ITunesItemDetailsChildBuilders) {
         navigation = nav
         builders = b
+    }
+}
+
+extension ITunesItemDetailsCoordinator: ITunesItemDetailsRouting {
+    func dismissScreen() {
+        navigation?.popViewController(animated: true)
     }
 }

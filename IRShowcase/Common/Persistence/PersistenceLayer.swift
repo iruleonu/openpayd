@@ -40,7 +40,7 @@ protocol PersistenceLayerRemove {
 }
 
 //sourcery: AutoMockable
-protocol PersistenceLayer: PersistenceLayerLoad, PersistenceLayerSave, PersistenceLayerRemove {
+protocol PersistenceLayer: PersistenceLayerLoad, PersistenceLayerSave, PersistenceLayerRemove, EntityFetchAudiobooksProtocol, EntityFetchTracksProtocol {
     
 }
 

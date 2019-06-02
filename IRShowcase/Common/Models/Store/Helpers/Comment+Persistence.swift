@@ -34,7 +34,7 @@ extension Comment: CodableToPersistence {
         return "\(id)"
     }
     
-    var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] {
+    static var propertiesToRemoveSavingEachPropertyValueAndSetItToTargetKey: [String: String] {
         return [:]
     }
     
