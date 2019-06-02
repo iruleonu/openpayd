@@ -19,7 +19,7 @@ struct ITunesSearchListCellViewModel {
     let id: Int64
     let title: String
     let imageUrl: String
-    let userHasSeenItem: Bool
+    var userHasSeenItem: Bool
     
     init(id: Int64, title: String, imageUrl: String, cellType: CellType, userHasSeenItem: Bool) {
         self.id = id

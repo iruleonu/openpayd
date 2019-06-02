@@ -24,7 +24,7 @@ struct RootBuilder: RootChildBuilders {
         let network = APIServiceImpl.default
         let persistence = PersistenceLayerImpl.default
         let connectivity = ConnectivityServiceImpl.default
-        let vc = ITunesSearchListBuilder().make(navigation: navigation, network: network, persistence: persistence, connectivity: connectivity)
+        let vc = ITunesSearchListBuilder().make(navigation: navigation, network: network, dataProviderPersistence: persistence, searchListPersistence: persistence, connectivity: connectivity)
         navigation.setViewControllers([vc], animated: false)
         navigation.navigationBar.prefersLargeTitles = true
         return navigation
@@ -36,7 +36,7 @@ struct RootBuilder: RootChildBuilders {
         let network = APIServiceImpl.default
         let persistence = PersistenceLayerImpl.default
         let connectivity = ConnectivityServiceImpl.default
-        let vc = ITunesSearchListBuilder().make(navigation: navigation, network: network, persistence: persistence, connectivity: connectivity)
+        let vc = ITunesSearchListBuilder().make(navigation: navigation, network: network, dataProviderPersistence: persistence, searchListPersistence: persistence, connectivity: connectivity)
         navigation.setViewControllers([vc], animated: false)
         navigation.navigationBar.prefersLargeTitles = true
         return navigation

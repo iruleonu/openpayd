@@ -10,52 +10,71 @@ import Foundation
 import AsyncDisplayKit
 import ReactiveSwift
 
+protocol ITunesItemDetailsHeaderDetails {
+    var itemTitle: String { get }
+    var itemSubtitle: String { get }
+    var itemDescription: String { get }
+    var itemImageUrl: String { get }
+}
+
 final class ITunesItemDetailsHeaderNode: ASCellNode {
+    let imageNode: ASNetworkImageNode
     let nameNode: ASTextNode
     let usernameNode: ASTextNode
     let emailNode: ASTextNode
     private let disposables: CompositeDisposable
     
     struct NDesign {
-        static let size: CGSize = CGSize(width: 0, height: 150)
+        static let imageSize: CGSize = CGSize(width: 150, height: 150)
         static let insets: UIEdgeInsets = UIEdgeInsets.zero
     }
     
     required init(viewModel vm: ITunesItemDetailsViewModel) {
-        nameNode = ITunesItemDetailsHeaderNode.setupNameNode(text: vm.posterName)
-        usernameNode = ITunesItemDetailsHeaderNode.setupUsernameNode(text: vm.posterUsername)
-        emailNode = ITunesItemDetailsHeaderNode.setupEmailNode(text: vm.posterEmail)
+        imageNode = ITunesItemDetailsHeaderNode.setupImageNode(imageUrl: vm.itemImageUrl)
+        nameNode = ITunesItemDetailsHeaderNode.setupNameNode(text: vm.itemTitle)
+        usernameNode = ITunesItemDetailsHeaderNode.setupUsernameNode(text: vm.itemSubtitle)
+        emailNode = ITunesItemDetailsHeaderNode.setupEmailNode(text: vm.itemDescription)
         disposables = CompositeDisposable()
         super.init()
         automaticallyManagesSubnodes = true
-        setupBindings(viewModel: vm)
     }
     
     deinit {
         disposables.dispose()
     }
     
-    private func setupBindings(viewModel vm: ITunesItemDetailsViewModel) {
-        disposables += vm.refreshSupplementaryElementOfKind.signal.observeValues { [weak self] (_) in
-            self?.updateUI(viewModel: vm)
-            self?.setNeedsLayout()
-        }
-    }
-    
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
+        imageNode.style.width = ASDimensionMakeWithPoints(ITunesItemDetailsHeaderNode.NDesign.imageSize.width)
+        imageNode.style.height = ASDimensionMakeWithPoints(ITunesItemDetailsHeaderNode.NDesign.imageSize.height)
+        
         let mainSpec = ASStackLayoutSpec(direction: ASStackLayoutDirection.vertical,
-                                         spacing: 0.0,
+                                         spacing: 10.0,
                                          justifyContent: ASStackLayoutJustifyContent.center,
                                          alignItems: ASStackLayoutAlignItems.center,
-                                         children: [nameNode, usernameNode, emailNode])
+                                         children: [imageNode, nameNode, usernameNode, emailNode])
         mainSpec.style.preferredSize = constrainedSize.max
         return ASInsetLayoutSpec(insets: NDesign.insets, child: mainSpec)
     }
     
-    private func updateUI(viewModel vm: ITunesItemDetailsViewModel) {
-        updateNameNodeText(vm.posterName)
-        updateUsernameNodeText(vm.posterUsername)
-        updateEmailNodeText(vm.posterEmail)
+    func updateUI(viewModel vm: ITunesItemDetailsViewModel) {
+        updateImageUrl(vm.itemImageUrl)
+        updateNameNodeText(vm.itemTitle)
+        updateUsernameNodeText(vm.itemSubtitle)
+        updateEmailNodeText(vm.itemDescription)
+    }
+    
+    private static func setupImageNode(imageUrl: String) -> ASNetworkImageNode {
+        let aux = ASNetworkImageNode()
+        
+        aux.url = URL(string: imageUrl)
+        aux.contentMode = .scaleAspectFill
+        aux.placeholderEnabled = true
+        aux.placeholderColor = UIColor.gray
+        aux.defaultImage = UIImage.as_imageNamed("AppIcon") ?? UIImage()
+        aux.isLayerBacked = true
+        aux.isOpaque = true
+        
+        return aux
     }
     
     private static func setupNameNode(text: String) -> ASTextNode {
@@ -80,7 +99,7 @@ final class ITunesItemDetailsHeaderNode: ASCellNode {
         let attr: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key.foregroundColor: UIColor.black
         ]
-        aux.maximumNumberOfLines = 2
+        aux.maximumNumberOfLines = 5
         aux.truncationMode = .byTruncatingTail
         aux.attributedText = NSAttributedString(string: text, attributes: attr)
         aux.isUserInteractionEnabled = false
@@ -95,13 +114,17 @@ final class ITunesItemDetailsHeaderNode: ASCellNode {
         let attr: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key.foregroundColor: UIColor.black
         ]
-        aux.maximumNumberOfLines = 2
+        aux.maximumNumberOfLines = 10
         aux.truncationMode = .byTruncatingTail
         aux.attributedText = NSAttributedString(string: text, attributes: attr)
         aux.isUserInteractionEnabled = false
         aux.placeholderEnabled = true
         
         return aux
+    }
+    
+    private func updateImageUrl(_ imageUrl: String) {
+        imageNode.url = URL(string: imageUrl)
     }
     
     private func updateNameNodeText(_ text: String) {
