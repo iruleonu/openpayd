@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import ReactiveSwift
 import enum Result.Result
 import enum Result.NoError
@@ -29,7 +30,7 @@ enum ITunesItemDetailsViewModelError: Error {
 protocol ITunesItemDetailsViewModelInputs {
     func viewDidLoad()
     func viewDidAppear()
-    func userDidTapDeleteButton()
+    func userDidTapDeleteButton(sourceVC: UIViewController)
 }
 
 protocol ITunesItemDetailsViewModelOutputs {
