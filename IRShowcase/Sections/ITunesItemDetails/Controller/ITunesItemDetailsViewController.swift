@@ -61,7 +61,7 @@ class ITunesItemDetailsViewController: ASViewController<ITunesItemDetailsNode> {
             action: #selector(self.userDidTapDeleteButton(_:))
         )
         
-        self.navigationItem.rightBarButtonItem = newOrderButton;
+        self.navigationItem.rightBarButtonItem = newOrderButton
     }
     
     private func setupBindings() {
@@ -85,6 +85,6 @@ class ITunesItemDetailsViewController: ASViewController<ITunesItemDetailsNode> {
 // MARK: Actions
 extension ITunesItemDetailsViewController {
     @objc func userDidTapDeleteButton(_ sender: UIBarButtonItem) {
-        viewModel.inputs.userDidTapDeleteButton()
+        viewModel.inputs.userDidTapDeleteButton(sourceVC: self)
     }
 }

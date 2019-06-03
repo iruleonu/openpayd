@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import ReactiveSwift
 import enum Result.Result
 import enum Result.NoError
@@ -101,11 +102,18 @@ final class ITunesTrackItemDetailsViewModelImpl: ITunesItemDetailsViewModel, ITu
     func viewDidAppear() {
         // Do nothing
     }
-    
-    func userDidTapDeleteButton() {
-        disposables += removeTrackData(trackId: itemId)
-        action(.deleteTrack)
-        routing.dismissScreen()
+    func userDidTapDeleteButton(sourceVC: UIViewController) {
+        let alertController = UIAlertController(title: "Are you sure you want to delete this item?", message: "You wont see it on the list anymore", preferredStyle: .alert)
+        let otherAction = UIAlertAction(title: "No", style: .default, handler: nil)
+        let destructiveAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] (action) in
+            guard let strongSelf = self else { return }
+            strongSelf.disposables += strongSelf.removeTrackData(trackId: strongSelf.itemId)
+            strongSelf.action(.deleteTrack)
+            strongSelf.routing.dismissScreen()
+        }
+        alertController.addAction(otherAction)
+        alertController.addAction(destructiveAction)
+        sourceVC.present(alertController, animated: true, completion: nil)
     }
     
     private static func fetchTrackHandler(trackId: Int, fetchType: DataProviderFetchType, tracksDataProvider adp: DataProvider<[Track]>) -> SignalProducer<([Track], DataProviderSource, DataProviderFetchType), DataProviderError> {
